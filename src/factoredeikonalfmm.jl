@@ -24,19 +24,19 @@ function solve_node(τ1::Array{R},
         end
         if fwdok 
             if check2fwd(τ1, τ0, tags, x, s, Iend)
-                α[i] = 1.5*τ0[x]/dx[i]-∇τ0[i][x]
-                β[i] = (2*τ1[x+s]-0.5*τ1[x+2*s])*τ0[x]/(dx[i]*α[i])
+                @inbounds α[i] = 1.5*τ0[x]/dx[i]-∇τ0[i][x]
+                @inbounds β[i] = (2*τ1[x+s]-0.5*τ1[x+2*s])*τ0[x]/(dx[i]*α[i])
             else
-                α[i] = τ0[x]/dx[i]-∇τ0[i][x]
-                β[i] = τ0[x]*τ1[x+s]/(dx[i]*α[i])
+                @inbounds α[i] = τ0[x]/dx[i]-∇τ0[i][x]
+                @inbounds β[i] = τ0[x]*τ1[x+s]/(dx[i]*α[i])
             end
         elseif bwdok
             if check2bwd(τ1, τ0, tags, x, s, I1)
-                α[i] = 1.5*τ0[x]/dx[i]+∇τ0[i][x]
-                β[i] = (2*τ1[x-s]-0.5*τ1[x-2*s])*τ0[x]/(dx[i]*α[i])
+                @inbounds α[i] = 1.5*τ0[x]/dx[i]+∇τ0[i][x]
+                @inbounds β[i] = (2*τ1[x-s]-0.5*τ1[x-2*s])*τ0[x]/(dx[i]*α[i])
             else
-                α[i] = τ0[x]/dx[i]+∇τ0[i][x]
-                β[i] = τ0[x]*τ1[x-s]/(dx[i]*α[i])
+                @inbounds α[i] = τ0[x]/dx[i]+∇τ0[i][x]
+                @inbounds β[i] = τ0[x]*τ1[x-s]/(dx[i]*α[i])
             end
         else
             α[i] = zero(R)
@@ -127,8 +127,3 @@ function fefmm(κ2::Array{R}, dx::Array{R}, x0::CartesianIndex) where {R <: Real
     end
     (τ1.*τ0, ordering)
 end
-
-κ2 = ones(5,5)
-R = Float64
-dx = [1.0, 1.0]
-x0 = CartesianIndex(1,1)

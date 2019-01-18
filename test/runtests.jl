@@ -1,0 +1,1 @@
+include("fefmm_tests.jl")
