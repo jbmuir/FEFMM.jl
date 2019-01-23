@@ -57,11 +57,29 @@ module FEFMM_Tests
         end
 
         @testset "Basic FEFMM Checks" begin
-        κ2 = ones(101)
-        dx = [0.1]
-        xs = CartesianIndex(1)
-        τa = 0:0.1:10
-        @test all(isapprox.(τa, FEFMM.fefmm(κ2, dx, xs)[1]))
+        κ21d = ones(101)
+        dx1d = [0.1]
+        xs1d = CartesianIndex(1)
+        τa1d = 0:0.1:10
+        @test all(isapprox.(τa1d, FEFMM.fefmm(κ21d, dx1d, xs1d)[1]))
+        κ22d = ones(101,101)
+        dx2d = [0.1,0.1]
+        xs2d = CartesianIndex(1,1)
+        τaxis = 0:0.1:10
+        τa2d = sqrt.(τaxis'.^2 .+ τaxis.^2)
+        @test all(isapprox.(τa2d, FEFMM.fefmm(κ22d, dx2d, xs2d)[1]))
+        κ23d = ones(101,101,101)
+        dx3d = [0.1,0.1,0.1]
+        xs3d = CartesianIndex(1,1,1)
+        τa3d = zeros(101,101,101)
+        for k in 1:101
+            for j in 1:101
+                for i in 1:101
+                    τa3d[i,j,k] = sqrt(τaxis[i]^2+τaxis[j]^2+τaxis[k]^2)
+                end
+            end
+        end
+        @test all(isapprox.(τa3d, FEFMM.fefmm(κ23d, dx3d, xs3d)[1]))
         end
     end
     #     @testset "Constant Gradient of Squared Slowness" begin

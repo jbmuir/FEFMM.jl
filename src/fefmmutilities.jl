@@ -36,6 +36,37 @@ function set_neighbours!(xn::Array{S,1}, x::S, tags::Array{UInt8}, cs::Array{S,1
 end
 
 
+function check1bwd(τ1::Array{R}, τ0::Array{R}, tags::Array{UInt8}, x::S, s::S, I1::S) where {R <: Real, S <: CartesianIndex}
+    if cilt(I1, x-s) && tags[x-s] == 0x3
+        return true
+    else
+        return false
+    end
+end
+
+function check1fwd(τ1::Array{R}, τ0::Array{R}, tags::Array{UInt8}, x::S, s::S, Iend::S) where {R <: Real, S <: CartesianIndex}
+    if cilt(x+s, Iend) && tags[x+s] == 0x3
+        return true
+    else
+        return false
+    end
+end
+
+function check2bwd(τ1::Array{R}, τ0::Array{R}, tags::Array{UInt8}, x::S, s::S, I1::S) where {R <: Real, S <:CartesianIndex}
+    if cilt(I1, x-2*s) && tags[x-2*s] == 0x3 && τ1[x-s]*τ0[x-s] >= τ1[x-2*s]*τ0[x-2*s]
+        return true
+    else
+        return false
+    end 
+end
+
+function check2fwd(τ1::Array{R}, τ0::Array{R}, tags::Array{UInt8}, x::S, s::S, Iend::S) where {R <: Real, S <:CartesianIndex}
+    if cilt(x+2*s, Iend) && tags[x+2s] == 0x3 && τ1[x+s]*τ0[x+s] > τ1[x+2*s]*τ0[x+2*s]
+        return true
+    else
+        return false
+    end 
+end
 
 # function check1bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, i::Int, Ipre::S1, Ipost::S2) where {R <: Real, N, S1 <: CartesianIndex, S2 <: CartesianIndex}
 #     if 1 <= i-1 && (@inbounds tags[Ipre, i-1, Ipost] == 0x3)

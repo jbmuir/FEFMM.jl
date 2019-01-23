@@ -1,7 +1,7 @@
 function solve_node(τ1::Array{R, N}, 
                     α::Array{R, 1},
                     β::Array{R, 1},
-                    τ0::Array{R,N},
+                    τ0::Array{R, N},
                     ∇τ0::Array{T},
                     tags::Array{UInt8, N},
                     κ2::Array{R, N},
@@ -11,12 +11,11 @@ function solve_node(τ1::Array{R, N},
                     I1::S, 
                     Iend::S) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex}
     #loop over dimensions to set \alpha and \beta ...
-    l = length(tags)
     for (i, s) in enumerate(cs)
-        fwdok, fwdval = check1fwd(τ1, τ0, tags, x, s, Iend)
-        bwdok, bwdval = check1bwd(τ1, τ0, tags, x, s, I1)
+        fwdok = check1fwd(τ1, τ0, tags, x, s, Iend)
+        bwdok = check1bwd(τ1, τ0, tags, x, s, I1)
         if fwdok && bwdok 
-            if fwdval < bwdval
+            if τ1[x+s]*τ0[x+s] < τ1[x-s]*τ0[x-s]
                 bwkok = false
             else 
                 fwdok = false
@@ -41,8 +40,8 @@ function solve_node(τ1::Array{R, N},
                 @inbounds β[i] = τ0[x]*τ1[x-s]/dx[i]
             end
         else
-            α[i] = zero(R)
-            β[i] = zero(R)
+            @inbounds α[i] = zero(R)
+            @inbounds β[i] = zero(R)
         end
     end
     #All of the \alpha and \beta should be set, so now we will proceed with solving the solve_quadratic
