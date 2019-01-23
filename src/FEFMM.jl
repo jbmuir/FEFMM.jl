@@ -1,7 +1,7 @@
 module FEFMM
 
     import Base: < 
-    using DataStructures: isempty, binary_minheap, BinaryHeap, LessThan
+    using DataStructures
     
     export fefmm
 

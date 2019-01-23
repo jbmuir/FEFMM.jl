@@ -44,22 +44,42 @@ module FEFMM_Tests
     end
 
     @testset "FEFMM Tests" begin
-        @testset "Constant Gradient of Squared Slowness" begin
-            h = 1/40
-            (x0, k2, t_exact) = const_k2(h)
-            (t_pred, ordering) = FEFMM.fefmm(k2, [h,h], x0)
-            Profile.clear()  # in case we have any previous profiling data
-            h = 1/160
-            (x0, k2, t_exact) = const_k2(h)
-            @profile FEFMM.fefmm(k2, [h,h], x0)
-            sqrt(sum((t_pred.-t_exact).^2)/length(t_pred))
+        @testset "Solve Piecewise Quadratic" begin
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,1.0,1.0), 2.0)
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,1.0,1.0,1.0,1.0), 1.0+1/sqrt(2))
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,1.0,100.0,1.0,1.0), 2.0)
+            @test isapprox(FEFMM.solve_piecewise_quadratic(2.0,1.0,1.0,100.0,1.0), 1.0)
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,1.0,1.0,1.0,1.0,1.0,1.0), 1.0+1/sqrt(3))
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,2.0,3.0,100.0,10.0,1.0,1.0), 2.0/3.0)
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,2.0,3.0,10.0,100.0,1.0,1.0), 2.0/3.0)
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,2.0,3.0,10.0,1.0,100.0,1.0), 1.0)
+            @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,2.0,3.0,1.0,10.0,100.0,1.0), 2.0)
         end
 
-        @testset "Constant Gradient of Squared Velocity" begin
-            h = 1/40
-            (x0, k2, t_exact) = const_v2(h)
-            (t_pred, ordering) = fefmm(k2, [h,h], x0)
-            sqrt(sum((t_pred.-t_exact).^2)/length(t_pred))
+        @testset "Basic FEFMM Checks" begin
+        κ2 = ones(101)
+        dx = [0.1]
+        xs = CartesianIndex(1)
+        τa = 0:0.1:10
+        @test all(isapprox.(τa, FEFMM.fefmm(κ2, dx, xs)[1]))
         end
     end
+    #     @testset "Constant Gradient of Squared Slowness" begin
+    #         h = 1/40
+    #         (x0, k2, t_exact) = const_k2(h)
+    #         (t_pred, ordering) = FEFMM.fefmm(k2, [h,h], x0)
+    #         Profile.clear()  # in case we have any previous profiling data
+    #         h = 1/160
+    #         (x0, k2, t_exact) = const_k2(h)
+    #         @profile FEFMM.fefmm(k2, [h,h], x0)
+    #         sqrt(sum((t_pred.-t_exact).^2)/length(t_pred))
+    #     end
+
+    #     @testset "Constant Gradient of Squared Velocity" begin
+    #         h = 1/40
+    #         (x0, k2, t_exact) = const_v2(h)
+    #         (t_pred, ordering) = fefmm(k2, [h,h], x0)
+    #         sqrt(sum((t_pred.-t_exact).^2)/length(t_pred))
+    #     end
+    # end
 end
