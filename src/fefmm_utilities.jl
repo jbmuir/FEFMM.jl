@@ -23,9 +23,9 @@ function mul_analytic!(τ::Array{R,3}, dx1::R, dx2::R, dx3::R, ie1::Int, ie2::In
 end
 
 function grad_analytic(τ0::Array{R,1}, dx1::R, ie1::Int, xs1::Int) where {R <: Real}
-    ∇τ0 = ones(size(τ0))
+    ∇τ0 = [ones(size(τ0))]
     for i1 = 1:ie1
-        @inbounds ∇τ0[i1] = dx1*(i1-xs1)/τ0[i1]
+        @inbounds ∇τ0[1][i1] = dx1*(i1-xs1)/τ0[i1]
     end
     ∇τ0
 end

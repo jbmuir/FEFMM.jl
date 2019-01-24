@@ -83,9 +83,9 @@ module FEFMM_Tests
         end
     end
     #     @testset "Constant Gradient of Squared Slowness" begin
-    #         h = 1/40
-    #         (x0, k2, t_exact) = const_k2(h)
-    #         (t_pred, ordering) = FEFMM.fefmm(k2, [h,h], x0)
+            h = 1/40
+            (x0, k2, t_exact) = const_k2(h)
+            (t_pred, ordering) = FEFMM.fefmm(k2, [h,h], x0)
     #         Profile.clear()  # in case we have any previous profiling data
     #         h = 1/160
     #         (x0, k2, t_exact) = const_k2(h)
