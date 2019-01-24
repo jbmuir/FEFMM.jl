@@ -9,13 +9,13 @@ function solve_node(τ1::Array{R, N},
                     dx::Array{R, 1}, 
                     cs::Array{S, 1}, 
                     I1::S, 
-                    Iend::S) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex}
+                    Iend::S) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex{N}}
     #loop over dimensions to set \alpha and \beta ...
     for (i, s) in enumerate(cs)
         fwdok = check1fwd(τ1, τ0, tags, x, s, Iend)
         bwdok = check1bwd(τ1, τ0, tags, x, s, I1)
         if fwdok && bwdok 
-            if τ1[x+s]*τ0[x+s] < τ1[x-s]*τ0[x-s]
+            if @inbounds τ1[x+s]*τ0[x+s] < τ1[x-s]*τ0[x-s]
                 bwkok = false
             else 
                 fwdok = false
@@ -45,7 +45,15 @@ function solve_node(τ1::Array{R, N},
         end
     end
     #All of the \alpha and \beta should be set, so now we will proceed with solving the solve_quadratic
-    solve_piecewise_quadratic(α..., β..., κ2[x])
+    #@inbounds solve_piecewise_quadratic(α..., β..., κ2[x])
+    if N == 1
+        @inbounds solve_piecewise_quadratic(α[1], β[1], κ2[x])
+    elseif N == 2
+        @inbounds solve_piecewise_quadratic(α[1], α[2], β[1], β[2], κ2[x])
+    elseif N == 3
+        @inbounds solve_piecewise_quadratic(α[1], α[2], α[3], β[1], β[2], β[3], κ2[x])
+    else
+    end
 end
 
 
@@ -57,14 +65,14 @@ function fefmm_loop!(τ1::Array{R, N},
                      τ0::Array{R, N}, 
                      ∇τ0::Array{T},
                      tags::Array{UInt8, N}, 
-                     front::BinaryMinHeap{Node{R}},
+                     front::BinaryMinHeap{Node{R, N}},
                      κ2::Array{R, N},
                      dx::Array{R, 1}, 
                      cs::Array{S, 1}, 
                      xn::Array{S, 1},
                      I1::S, 
                      Iend::S, 
-                     LI::LinearIndices{N}) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex}
+                     LI::LinearIndices{N}) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex{N}}
     while isempty(front) == false
         x = pop!(front).ind
         if tags[x] < 0x3 # as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
@@ -103,7 +111,7 @@ Tags:
 3 = known
 """
 
-function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, x0::CartesianIndex) where {N, R <: Real}
+function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {N, R <: Real}
     #initialization
     ordering = Array{Int}(undef, length(κ2))
     cs = cartstrides(κ2)
@@ -111,19 +119,14 @@ function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, x0::CartesianIndex) where {N, 
     I1 = first(inds)
     Iend = last(inds)
     τ0 = ones(R, size(κ2))
-    mul_analytic!(τ0, dx, x0)
-    ∇τ0 = Array{typeof(τ0)}(undef, 0)
-    for i in 1:length(size(τ0))
-        ∇τ0i = ones(R, size(κ2))
-        mul_grad_analytic!(∇τ0i, dx, x0, i)
-        push!(∇τ0, ∇τ0i)
-    end
+    mul_analytic!(τ0, dx..., size(κ2)..., Tuple(xs)...)
+    ∇τ0 = grad_analytic(τ0, dx..., size(κ2)..., Tuple(xs)...)
     τ1 = Inf.*ones(R, size(κ2))
-    τ1[x0] = κ2[x0]
+    τ1[xs] = κ2[xs]
     tags = ones(UInt8,size(κ2))
-    tags[x0] = 0x2
-    front = BinaryMinHeap{Node{R}}()
-    push!(front, Node(inds[x0], τ1[x0]*τ0[x0])) 
+    tags[xs] = 0x2
+    front = BinaryMinHeap{Node{R,N}}()
+    push!(front, Node(inds[xs], τ1[xs]*τ0[xs])) 
     α = Array{R}(undef,length(size(τ1)))
     β = similar(α)
     LI = LinearIndices(τ1)
