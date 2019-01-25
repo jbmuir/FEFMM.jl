@@ -75,19 +75,19 @@ function fefmm_loop!(τ1::Array{R, N},
                      LI::LinearIndices{N}) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex{N}}
     while isempty(front) == false
         x = pop!(front).ind
-        if tags[x] < 0x3# as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
-            ordering[ocount] = LI[x]
+        @inbounds if tags[x] < 0x3# as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
+            @inbounds ordering[ocount] = LI[x]
             ocount += 1
-            tags[x] = 0x3
+            @inbounds tags[x] = 0x3
             set_neighbours!(xn, x, tags, cs, I1, Iend)
             for y in xn 
                 if y != x # to avoid allocating neighbours repeatedly we reuse xn but have y = x as the "neighbour not acceptable" flag value
-                    tags[y] = 0x2 #move neighbours to front
+                    @inbounds tags[y] = 0x2 #move neighbours to front
                     τ1y = solve_node(τ1, α, β, τ0, ∇τ0, tags, κ2, y, dx, cs, I1, Iend)
-                    if τ1y < τ1[y]
+                    @inbounds if τ1y < τ1[y]
                             #only update and add new node to heap if the new solution is smaller 
-                        τ1[y] = τ1y
-                        push!(front, Node(y, τ1[y]*τ0[y]))
+                        @inbounds τ1[y] = τ1y
+                        @inbounds push!(front, Node(y, τ1[y]*τ0[y]))
                     end
                 end
             end
@@ -122,7 +122,7 @@ function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {
     mul_analytic!(τ0, dx..., size(κ2)..., Tuple(xs)...)
     ∇τ0 = grad_analytic(τ0, dx..., size(κ2)..., Tuple(xs)...)
     τ1 = Inf.*ones(R, size(κ2))
-    τ1[xs] = κ2[xs]
+    τ1[xs] = sqrt(κ2[xs])
     tags = ones(UInt8,size(κ2))
     tags[xs] = 0x2
     front = BinaryMinHeap{Node{R,N}}()

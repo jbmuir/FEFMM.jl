@@ -57,7 +57,7 @@ end
 end
 
 @noinline function check2fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: Real, S <:CartesianIndex{N}}
-    if cilt(x+2*s, Iend) && @inbounds tags[x+2s] == 0x3 && @inbounds τ1[x+s]*τ0[x+s] > τ1[x+2*s]*τ0[x+2*s]
+    if cilt(x+2*s, Iend) && @inbounds tags[x+2*s] == 0x3 && @inbounds τ1[x+s]*τ0[x+s] > τ1[x+2*s]*τ0[x+2*s]
         return true
     else
         return false
