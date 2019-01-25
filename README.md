@@ -17,6 +17,6 @@ This module exports a single method, e.g.
 # Requirements
  - Julia 0.7+
  - DataStructures.jl
- - Plots.jl [test]
+ - UnicodePlots.jl [test]
  - Test.jl [test]
  - LinearAlgebra.jl [test]
