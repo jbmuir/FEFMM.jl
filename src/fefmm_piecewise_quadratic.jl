@@ -60,7 +60,7 @@ function solve_piecewise_quadratic(α1::R, α2::R, α3::R, β1::R, β2::R, β3::
             end
         else
             if tr1 <= tr3
-                τ1t = solve_piecewise_quadratic(α2, α1, β2, β2, κ2x)
+                τ1t = solve_piecewise_quadratic(α2, α1, β2, β1, κ2x)
             else
                 τ1t = solve_piecewise_quadratic(α2, α3, β2, β3, κ2x)
             end

@@ -47,13 +47,13 @@ function solve_node(τ1::Array{R, N},
     #All of the \alpha and \beta should be set, so now we will proceed with solving the solve_quadratic
     #@inbounds solve_piecewise_quadratic(α..., β..., κ2[x])
     if N == 1
-        @inbounds solve_piecewise_quadratic(α[1], β[1], κ2[x])
+        @inbounds τ1y = solve_piecewise_quadratic(α[1], β[1], κ2[x])
     elseif N == 2
-        @inbounds solve_piecewise_quadratic(α[1], α[2], β[1], β[2], κ2[x])
+        @inbounds τ1y = solve_piecewise_quadratic(α[1], α[2], β[1], β[2], κ2[x])
     elseif N == 3
-        @inbounds solve_piecewise_quadratic(α[1], α[2], α[3], β[1], β[2], β[3], κ2[x])
-    else
+        @inbounds τ1y = solve_piecewise_quadratic(α[1], α[2], α[3], β[1], β[2], β[3], κ2[x])        
     end
+    τ1y
 end
 
 
@@ -75,7 +75,7 @@ function fefmm_loop!(τ1::Array{R, N},
                      LI::LinearIndices{N}) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex{N}}
     while isempty(front) == false
         x = pop!(front).ind
-        if tags[x] < 0x3 # as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
+        if tags[x] < 0x3# as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
             ordering[ocount] = LI[x]
             ocount += 1
             tags[x] = 0x3

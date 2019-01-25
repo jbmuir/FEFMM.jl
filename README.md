@@ -19,3 +19,4 @@ This module exports a single method, e.g.
  - DataStructures.jl
  - Plots.jl [test]
  - Test.jl [test]
+ - LinearAlgebra.jl [test]

@@ -16,7 +16,7 @@ function mul_analytic!(τ::Array{R,3}, dx1::R, dx2::R, dx3::R, ie1::Int, ie2::In
     for i3 = 1:ie3
         for i2 = 1:ie2
             for i1 = 1:ie1
-                @inbounds τ[i1,i2,i3] *= sqrt(sum(((i1-xs1)*dx1)^2+((i2-xs2)*dx2)^2+((i2-xs2)*dx2)^2))
+                @inbounds τ[i1,i2,i3] *= sqrt(sum(((i1-xs1)*dx1)^2+((i2-xs2)*dx2)^2+((i3-xs3)*dx3)^2))
             end
         end
     end
