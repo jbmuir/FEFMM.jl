@@ -46,7 +46,7 @@ module FEFMM_Tests
         end
 
         @testset "Constant Gradient of Squared Slowness 2D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320, 1/640, 1/1280]
+            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]#, 1/640, 1/1280]
             linorm = zeros(length(hlist))
             l2norm = zeros(length(hlist))
             for i = 1:length(hlist)
@@ -74,7 +74,7 @@ module FEFMM_Tests
         end
 
         @testset "Constant Gradient of Squared Velocity 2D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320, 1/640, 1/1280]
+            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]#, 1/640, 1/1280]
             linorm = zeros(length(hlist))
             l2norm = zeros(length(hlist))
             for i = 1:length(hlist)
@@ -102,7 +102,7 @@ module FEFMM_Tests
         end
 
         @testset "Gaussian Factor 2D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320, 1/640, 1/1280]
+            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]#, 1/640, 1/1280]
             linorm = zeros(length(hlist))
             l2norm = zeros(length(hlist))
             for i = 1:length(hlist)
@@ -130,7 +130,7 @@ module FEFMM_Tests
         end
         
         @testset "Constant Gradient of Squared Slowness 3D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]
+            hlist = [1/10, 1/20, 1/40, 1/80]#, 1/160, 1/320]
             linorm = zeros(length(hlist))
             l2norm = zeros(length(hlist))
             for i = 1:length(hlist)
@@ -158,7 +158,7 @@ module FEFMM_Tests
         end
 
         @testset "Constant Gradient of Squared Velocity 3D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]
+            hlist = [1/10, 1/20, 1/40, 1/80]#, 1/160, 1/320]
             linorm = zeros(length(hlist))
             l2norm = zeros(length(hlist))
             for i = 1:length(hlist)
@@ -186,7 +186,7 @@ module FEFMM_Tests
         end
 
         @testset "Gaussian Factor 3D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]
+            hlist = [1/10, 1/20, 1/40, 1/80]#, 1/160, 1/320]
             linorm = zeros(length(hlist))
             l2norm = zeros(length(hlist))
             for i = 1:length(hlist)
