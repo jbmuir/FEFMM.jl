@@ -1,6 +1,8 @@
 FEFMM.jl
 =================
 
+[![Build Status](https://travis-ci.com/jbmuir/FEFMM.jl.svg?branch=master)](https://travis-ci.com/jbmuir/FEFMM.jl)
+
 This is a lightweight, Julia 1.0+ compatible version of Treister & Haber's Factored Eikonal Fast Marching Method. 
 
 See Treister & Haber "A Fast marching algorithm for the factored eikonal equation" https://arxiv.org/abs/1607.00973 with implementation at https://github.com/JuliaInv/FactoredEikonalFastMarching.jl
