@@ -27,6 +27,8 @@ function grad_analytic(τ0::Array{R,1}, dx1::R, ie1::Int, xs1::Int) where {R <: 
     for i1 = 1:ie1
         @inbounds ∇τ0[1][i1] = dx1*(i1-xs1)/τ0[i1]
     end
+    #set terms at source
+    ∇τ0[1][xs1] = one(R)
     ∇τ0
 end
 
@@ -38,6 +40,8 @@ function grad_analytic(τ0::Array{R,2}, dx1::R, dx2::R, ie1::Int, ie2::Int, xs1:
             @inbounds ∇τ0[2][i1,i2] = dx2*(i2-xs2)/τ0[i1,i2]
         end
     end
+    ∇τ0[1][xs1, xs2] = convert(R, 1/sqrt(2))
+    ∇τ0[2][xs1, xs2] = convert(R, 1/sqrt(2))
     ∇τ0
 end
 
@@ -52,5 +56,8 @@ function grad_analytic(τ0::Array{R,3}, dx1::R, dx2::R, dx3::R, ie1::Int, ie2::I
             end
         end
     end
+    ∇τ0[1][xs1, xs2, xs3] = convert(R, 1/sqrt(3))
+    ∇τ0[2][xs1, xs2, xs3] = convert(R, 1/sqrt(3)) 
+    ∇τ0[3][xs1, xs2, xs3] = convert(R, 1/sqrt(3))       
     ∇τ0
 end

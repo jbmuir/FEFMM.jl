@@ -3,4 +3,3 @@ language: julia
 julia:
   - nightly
   - 1.0
-  - 0.7
