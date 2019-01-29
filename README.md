@@ -5,7 +5,10 @@ FEFMM.jl
 
 This is a lightweight, Julia 1.0+ compatible version of Treister & Haber's Factored Eikonal Fast Marching Method. 
 
-See Eran Treister and Eldad Haber, A fast marching algorithm for the factored eikonal equation, Journal of Computational Physics, 324, 210-225, 2016. with implementation at https://github.com/JuliaInv/FactoredEikonalFastMarching.jl
+See: 
+Eran Treister and Eldad Haber, *A fast marching algorithm for the factored eikonal equation*, Journal of Computational Physics, 324, 210-225, 2016. 
+
+with implementation at https://github.com/JuliaInv/FactoredEikonalFastMarching.jl
 
 This module exports a single function, e.g.
 
