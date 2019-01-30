@@ -1,4 +1,4 @@
-struct Node{R <: Real, N}
+struct Node{R <: AbstractFloat, N}
     ind::CartesianIndex{N}
     val::R
 end

@@ -9,7 +9,7 @@ function solve_node(τ1::Array{R, N},
                     dx::Array{R, 1}, 
                     cs::Array{S, 1}, 
                     I1::S, 
-                    Iend::S) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex{N}}
+                    Iend::S) where {N, R <: AbstractFloat, T <: Array{R, N}, S <: CartesianIndex{N}}
     #loop over dimensions to set \alpha and \beta ...
     for (i, s) in enumerate(cs)
         fwdok = check1fwd(τ1, τ0, tags, x, s, Iend)
@@ -72,7 +72,7 @@ function fefmm_loop!(τ1::Array{R, N},
                      xn::Array{S, 1},
                      I1::S, 
                      Iend::S, 
-                     LI::LinearIndices{N}) where {N, R <: Real, T <: Array{R, N}, S <: CartesianIndex{N}}
+                     LI::LinearIndices{N}) where {N, R <: AbstractFloat, T <: Array{R, N}, S <: CartesianIndex{N}}
     while isempty(front) == false
         x = pop!(front).ind
         @inbounds if tags[x] < 0x3# as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
@@ -111,7 +111,7 @@ Tags:
 3 = known
 """
 
-function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {N, R <: Real}
+function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {N, R <: AbstractFloat}
     #initialization
     ordering = Array{Int}(undef, length(κ2))
     cs = cartstrides(κ2)

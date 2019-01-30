@@ -32,7 +32,7 @@ function set_neighbours!(xn::Array{S,1}, x::S, tags::Array{UInt8, N}, cs::Array{
 end
 
 
-@noinline function check1bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, I1::S) where {N, R <: Real, S <: CartesianIndex{N}}
+@noinline function check1bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, I1::S) where {N, R <: AbstractFloat, S <: CartesianIndex{N}}
     if cilt(I1, x-s) && @inbounds tags[x-s] == 0x3
         return true
     else
@@ -40,7 +40,7 @@ end
     end
 end
 
-@noinline function check1fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: Real, S <: CartesianIndex{N}}
+@noinline function check1fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: AbstractFloat, S <: CartesianIndex{N}}
     if cilt(x+s, Iend) && @inbounds tags[x+s] == 0x3
         return true
     else
@@ -48,7 +48,7 @@ end
     end
 end
 
-@noinline function check2bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, I1::S) where {N, R <: Real, S <:CartesianIndex{N}}
+@noinline function check2bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, I1::S) where {N, R <: AbstractFloat, S <:CartesianIndex{N}}
     if cilt(I1, x-2*s) && @inbounds tags[x-2*s] == 0x3 && @inbounds τ1[x-s]*τ0[x-s] >= τ1[x-2*s]*τ0[x-2*s]
         return true
     else
@@ -56,7 +56,7 @@ end
     end 
 end
 
-@noinline function check2fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: Real, S <:CartesianIndex{N}}
+@noinline function check2fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: AbstractFloat, S <:CartesianIndex{N}}
     if cilt(x+2*s, Iend) && @inbounds tags[x+2*s] == 0x3 && @inbounds τ1[x+s]*τ0[x+s] > τ1[x+2*s]*τ0[x+2*s]
         return true
     else
