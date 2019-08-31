@@ -4,3 +4,4 @@ struct Node{R <: AbstractFloat, N}
 end
 
 <(a::Node, b::Node) = a.val < b.val
+

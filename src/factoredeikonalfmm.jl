@@ -137,3 +137,4 @@ function fefmm(κ2::Array{R, N},
     fefmm_loop!(τ1, 1, ordering, α, β, τ0, ∇τ0, tags, front, κ2, dx, cs, xn, I1, Iend, LI)
     (τ1.*τ0, ordering)
 end
+

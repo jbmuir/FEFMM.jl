@@ -68,3 +68,4 @@ function solve_piecewise_quadratic(α1::R, α2::R, α3::R, β1::R, β2::R, β3::
     end
     τ1t 
 end
+
