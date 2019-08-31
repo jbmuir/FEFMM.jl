@@ -31,6 +31,7 @@ module FEFMM_Tests
             τaxis = 0:0.1:10
             τa2d = sqrt.(τaxis'.^2 .+ τaxis.^2)
             @test all(isapprox.(τa2d, FEFMM.fefmm(κ22d, dx2d, xs2d)[1]))
+            @test all(isapprox.(Float32.(τa2d), Float32.(FEFMM.fefmm(κ22d, Float32.(dx2d), xs2d)[1])))
             κ23d = ones(101,101,101)
             dx3d = [0.1,0.1,0.1]
             xs3d = CartesianIndex(1,1,1)
@@ -43,6 +44,7 @@ module FEFMM_Tests
                 end
             end
             @test all(isapprox.(τa3d, FEFMM.fefmm(κ23d, dx3d, xs3d)[1]))
+            @test all(isapprox.(Float32.(τa3d), Float32.(FEFMM.fefmm(κ23d, Float32.(dx3d), xs3d)[1])))
         end
 
         @testset "Constant Gradient of Squared Slowness 2D" begin
