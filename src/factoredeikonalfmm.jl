@@ -1,13 +1,13 @@
 function solve_node(τ1::Array{R, N}, 
-                    α::Array{R, 1},
-                    β::Array{R, 1},
+                    α::Vector{R},
+                    β::Vector{R},
                     τ0::Array{R, N},
                     ∇τ0::Array{T},
                     tags::Array{UInt8, N},
                     κ2::Array{R, N},
                     x::S,
-                    dx::Array{R, 1}, 
-                    cs::Array{S, 1}, 
+                    dx::Vector{<:AbstractFloat},
+                    cs::Vector{S},
                     I1::S, 
                     Iend::S) where {N, R <: AbstractFloat, T <: Array{R, N}, S <: CartesianIndex{N}}
     #loop over dimensions to set \alpha and \beta ...
@@ -58,18 +58,18 @@ end
 
 
 function fefmm_loop!(τ1::Array{R, N}, 
-                     ocount::Int,
-                     ordering::Array{Int, 1},
-                     α::Array{R,1},
-                     β::Array{R,1},
+                     ocount::Integer,
+                     ordering::Vector{<:Integer},
+                     α::Vector{R},
+                     β::Vector{R},
                      τ0::Array{R, N}, 
                      ∇τ0::Array{T},
                      tags::Array{UInt8, N}, 
                      front::BinaryMinHeap{Node{R, N}},
                      κ2::Array{R, N},
-                     dx::Array{R, 1}, 
-                     cs::Array{S, 1}, 
-                     xn::Array{S, 1},
+                     dx::Vector{<:AbstractFloat},
+                     cs::Vector{S},
+                     xn::Vector{S},
                      I1::S, 
                      Iend::S, 
                      LI::LinearIndices{N}) where {N, R <: AbstractFloat, T <: Array{R, N}, S <: CartesianIndex{N}}
@@ -111,7 +111,9 @@ Tags:
 3 = known
 """
 
-function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {N, R <: AbstractFloat}
+function fefmm(κ2::Array{R, N},
+               dx::Vector{<:AbstractFloat},
+               xs::CartesianIndex{N}) where {R <: AbstractFloat, N}
     #initialization
     ordering = Array{Int}(undef, length(κ2))
     cs = cartstrides(κ2)
@@ -121,7 +123,7 @@ function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {
     τ0 = ones(R, size(κ2))
     mul_analytic!(τ0, dx..., size(κ2)..., Tuple(xs)...)
     ∇τ0 = grad_analytic(τ0, dx..., size(κ2)..., Tuple(xs)...)
-    τ1 = Inf.*ones(R, size(κ2))
+    τ1 = R(Inf).*ones(R, size(κ2))
     τ1[xs] = sqrt(κ2[xs])
     tags = ones(UInt8,size(κ2))
     tags[xs] = 0x2
@@ -135,3 +137,4 @@ function fefmm(κ2::Array{R, N}, dx::Array{R, 1}, xs::CartesianIndex{N}) where {
     fefmm_loop!(τ1, 1, ordering, α, β, τ0, ∇τ0, tags, front, κ2, dx, cs, xn, I1, Iend, LI)
     (τ1.*τ0, ordering)
 end
+

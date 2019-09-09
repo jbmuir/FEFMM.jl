@@ -186,3 +186,4 @@ function gaussian_factor_3D(h)
     k2 = @. t_dx1*t_dx1+t_dx2*t_dx2+t_dx3*t_dx3
     (x0, k2, t1_exact.*t0)
 end
+

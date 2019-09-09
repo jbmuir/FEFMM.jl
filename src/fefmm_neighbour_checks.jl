@@ -16,7 +16,7 @@ function cartstrides(A::AbstractArray)
     [inds...]
 end
 
-function set_neighbours!(xn::Array{S,1}, x::S, tags::Array{UInt8, N}, cs::Array{S,1}, I1::S, Iend::S) where {N, S <: CartesianIndex{N}}
+function set_neighbours!(xn::Vector{S}, x::S, tags::Array{UInt8, N}, cs::Vector{S}, I1::S, Iend::S) where {N, S <: CartesianIndex{N}}
     for (i,s) in enumerate(cs)
         if cilt(I1, x-s) && @inbounds tags[x-s] < 0x3 
             @inbounds xn[2*i-1] = x-s
@@ -63,3 +63,4 @@ end
         return false
     end 
 end
+
