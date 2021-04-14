@@ -3,5 +3,5 @@ struct Node{R <: AbstractFloat, N}
     val::R
 end
 
-<(a::Node, b::Node) = a.val < b.val
+isless(a::Node, b::Node) = isless(a.val, b.val)
 

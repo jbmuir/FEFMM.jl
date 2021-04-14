@@ -1,6 +1,6 @@
 module FEFMM
 
-    import Base: < 
+    import Base: isless
     using DataStructures
     
     export fefmm
