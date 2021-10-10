@@ -59,7 +59,6 @@ end
 
 function fefmm_loop!(τ1::Array{R, N}, 
                      ocount::Integer,
-                     ordering::Vector{<:Integer},
                      α::Vector{R},
                      β::Vector{R},
                      τ0::Array{R, N}, 
@@ -76,7 +75,6 @@ function fefmm_loop!(τ1::Array{R, N},
     while isempty(front) == false
         x = pop!(front).ind
         @inbounds if tags[x] < 0x3# as we are using a non-mutable minheap, we might have already set this node to known on another pass (i.e. this could be an old worthless version of the node). This check makes sure we don't accidentally override something we already have computed
-            @inbounds ordering[ocount] = LI[x]
             ocount += 1
             @inbounds tags[x] = 0x3
             set_neighbours!(xn, x, tags, cs, I1, Iend)
@@ -115,7 +113,6 @@ function fefmm(κ2::Array{R, N},
                dx::Vector{<:AbstractFloat},
                xs::CartesianIndex{N}) where {R <: AbstractFloat, N}
     #initialization
-    ordering = Array{Int}(undef, length(κ2))
     cs = cartstrides(κ2)
     inds = CartesianIndices(κ2)
     I1 = first(inds)
@@ -134,7 +131,7 @@ function fefmm(κ2::Array{R, N},
     LI = LinearIndices(τ1)
     xn = Array{typeof(I1)}(undef, N*2)
     #main loop
-    fefmm_loop!(τ1, 1, ordering, α, β, τ0, ∇τ0, tags, front, κ2, dx, cs, xn, I1, Iend, LI)
-    (τ1.*τ0, ordering)
+    fefmm_loop!(τ1, 1, α, β, τ0, ∇τ0, tags, front, κ2, dx, cs, xn, I1, Iend, LI)
+    τ1.*τ0
 end
 
