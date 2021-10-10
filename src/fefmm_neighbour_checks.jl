@@ -1,7 +1,3 @@
-# function schecklt(a::Int, b1::Int, b2::Int, s::Int)
-#     a < b && cld(b1, s) == cld(b2, s)
-# end
-
 cilt(a::S, b::S) where {S <: CartesianIndex} = all(a.I .<= b.I)
 
 function cartstrides(A::AbstractArray)
