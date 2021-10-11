@@ -1,4 +1,4 @@
-function const_k2_2D(h)
+function const_κ²_2D(h)
     #Define Medium
     a = -0.4
     s0 = 2.0
@@ -12,11 +12,11 @@ function const_k2_2D(h)
     x0 = CartesianIndex(szi, sxi)
     dist2 = ((X.-sx)').^2 .+ ((Z.-sz)).^2
     depth = 0.0*(X.-sx)'.+(Z.-sz)
-    k2 = s0^2 .+ 2*a*depth
+    κ² = s0^2 .+ 2*a*depth
     Sb2 = s0^2 .+ a*depth
     sig2 = 2*dist2./(Sb2.+sqrt.(Sb2.^2 .- a*a*dist2))
-    t_exact = Sb2.*sqrt.(sig2) .- a*a*sqrt.(sig2).^3 ./ 6
-    (x0, k2, t_exact)
+    τ_exact = Sb2.*sqrt.(sig2) .- a*a*sqrt.(sig2).^3 ./ 6
+    (x0, κ², τ_exact)
 end
 
 function const_v2_2D(h)
@@ -34,8 +34,8 @@ function const_v2_2D(h)
     dist2 = ((X.-sx)').^2 .+ ((Z.-sz)).^2
     depth = 0.0*(X.-sx)'.+(Z.-sz)
     k = 1 ./ (1/s0 .+ a*depth)
-    t_exact = @. 1/a*acosh(1+1/2*s0*a*a*k*dist2)
-    (x0, k.^2, t_exact)
+    τ_exact = @. 1/a*acosh(1+1/2*s0*a*a*k*dist2)
+    (x0, k.^2, τ_exact)
 end
 
 function gaussian_factor_2D(h)
@@ -53,21 +53,21 @@ function gaussian_factor_2D(h)
     x1z = Z[argmin(abs.(Z.-x1z_attempt))]#-h
 
     x0 = CartesianIndex(szi, sxi)
-    t1_exact = @. exp(-(sigmaz*((Z-x1z)^2)+sigmax*((X'-x1x)^2)))/2+1/2
-    t1_dz_exact = @. -2*sigmaz*(Z-x1z)*(t1_exact-1/2)
-    t1_dx_exact = @. -2*sigmax*(X'-x1x)*(t1_exact-1/2)
+    τ₁_exact = @. exp(-(sigmaz*((Z-x1z)^2)+sigmax*((X'-x1x)^2)))/2+1/2
+    τ₁_dz_exact = @. -2*sigmaz*(Z-x1z)*(τ₁_exact-1/2)
+    τ₁_dx_exact = @. -2*sigmax*(X'-x1x)*(τ₁_exact-1/2)
 
-    t0 = ones(size(t1_exact))
-    FEFMM.mul_analytic!(t0, h, h, size(t1_exact)..., szi, sxi)
-    t0_dz, t0_dx = FEFMM.grad_analytic(t0, h, h, size(t1_exact)..., szi, sxi)
+    τ₀ = ones(size(τ₁_exact))
+    FEFMM.mul_analytic!(τ₀, h, h, size(τ₁_exact)..., szi, sxi)
+    τ₀_dz, τ₀_dx = FEFMM.grad_analytic(τ₀, h, h, size(τ₁_exact)..., szi, sxi)
 
-    t_dz = @. t0*t1_dz_exact+t0_dz*t1_exact
-    t_dx = @. t0*t1_dx_exact+t0_dx*t1_exact
-    k2 = @. t_dz*t_dz+t_dx*t_dx
-    (x0, k2, t1_exact.*t0)
+    τ_dz = @. τ₀*τ₁_dz_exact+τ₀_dz*τ₁_exact
+    τ_dx = @. τ₀*τ₁_dx_exact+τ₀_dx*τ₁_exact
+    κ² = @. τ_dz*τ_dz+τ_dx*τ_dx
+    (x0, κ², τ₁_exact.*τ₀)
 end
 
-function const_k2_3D(h)
+function const_κ²_3D(h)
     #Define Medium
     a = -1.65
     s0 = 2.0
@@ -94,11 +94,11 @@ function const_k2_3D(h)
         end
     end
 
-    k2 = @. s0^2+2*a*depth
+    κ² = @. s0^2+2*a*depth
     Sb2 = @. s0^2+a*depth
     sig2 = @. 2*dist2/(Sb2+sqrt(Sb2^2-a*a*dist2))
-    t_exact = @. Sb2*sqrt(sig2)-a*a*(sqrt(sig2)^3)/6
-    (x0, k2, t_exact)
+    τ_exact = @. Sb2*sqrt(sig2)-a*a*(sqrt(sig2)^3)/6
+    (x0, κ², τ_exact)
 end
 
 function const_v2_3D(h)
@@ -130,8 +130,8 @@ function const_v2_3D(h)
     
     #get parameters
     k = @. 1/(1/s0+a*depth)
-    t_exact = @. 1/a*acosh(1+1/2*s0*a*a*k*dist2)
-    (x0, k.^2, t_exact)
+    τ_exact = @. 1/a*acosh(1+1/2*s0*a*a*k*dist2)
+    (x0, k.^2, τ_exact)
 end
 
 function gaussian_factor_3D(h)
@@ -158,32 +158,32 @@ function gaussian_factor_3D(h)
     x12 = X2[argmin(abs.(X2.-x12_attempt))]#-h
     x13 = X3[argmin(abs.(X3.-x13_attempt))]
 
-    t1_exact = zeros(length(X1), length(X2), length(X3))
-    t1_dx1_exact = zeros(length(X1), length(X2), length(X3))
-    t1_dx2_exact = zeros(length(X1), length(X2), length(X3))
-    t1_dx3_exact = zeros(length(X1), length(X2), length(X3))
+    τ₁_exact = zeros(length(X1), length(X2), length(X3))
+    τ₁_dx1_exact = zeros(length(X1), length(X2), length(X3))
+    τ₁_dx2_exact = zeros(length(X1), length(X2), length(X3))
+    τ₁_dx3_exact = zeros(length(X1), length(X2), length(X3))
 
     # get medium
     for k = 1:length(X3)
         for j = 1:length(X2)
             for i = 1:length(X1)
-                t1_exact[i,j,k] = exp(-(sigmax1*(X1[i]-x11)^2+sigmax2*(X2[j]-x12)^2+sigmax3*(X3[k]-x13)^2))/2+1/2
-                t1_dx1_exact[i,j,k] = -2*sigmax1*(X1[i]-x11)*(t1_exact[i,j,k]-1/2)
-                t1_dx2_exact[i,j,k] = -2*sigmax2*(X2[j]-x12)*(t1_exact[i,j,k]-1/2)
-                t1_dx3_exact[i,j,k] = -2*sigmax3*(X3[k]-x13)*(t1_exact[i,j,k]-1/2)
+                τ₁_exact[i,j,k] = exp(-(sigmax1*(X1[i]-x11)^2+sigmax2*(X2[j]-x12)^2+sigmax3*(X3[k]-x13)^2))/2+1/2
+                τ₁_dx1_exact[i,j,k] = -2*sigmax1*(X1[i]-x11)*(τ₁_exact[i,j,k]-1/2)
+                τ₁_dx2_exact[i,j,k] = -2*sigmax2*(X2[j]-x12)*(τ₁_exact[i,j,k]-1/2)
+                τ₁_dx3_exact[i,j,k] = -2*sigmax3*(X3[k]-x13)*(τ₁_exact[i,j,k]-1/2)
             end
         end
     end
 
-    t0 = ones(size(t1_exact))
-    FEFMM.mul_analytic!(t0, h, h, h, size(t1_exact)..., sx1i, sx2i, sx3i)
-    t0_dx1, t0_dx2, t0_dx3 = FEFMM.grad_analytic(t0, h, h, h, size(t1_exact)...,  sx1i, sx2i, sx3i)
+    τ₀ = ones(size(τ₁_exact))
+    FEFMM.mul_analytic!(τ₀, h, h, h, size(τ₁_exact)..., sx1i, sx2i, sx3i)
+    τ₀_dx1, τ₀_dx2, τ₀_dx3 = FEFMM.grad_analytic(τ₀, h, h, h, size(τ₁_exact)...,  sx1i, sx2i, sx3i)
 
-    t_dx1 = @. t0*t1_dx1_exact+t0_dx1*t1_exact
-    t_dx2 = @. t0*t1_dx2_exact+t0_dx2*t1_exact
-    t_dx3 = @. t0*t1_dx3_exact+t0_dx3*t1_exact
+    τ_dx1 = @. τ₀*τ₁_dx1_exact+τ₀_dx1*τ₁_exact
+    τ_dx2 = @. τ₀*τ₁_dx2_exact+τ₀_dx2*τ₁_exact
+    τ_dx3 = @. τ₀*τ₁_dx3_exact+τ₀_dx3*τ₁_exact
 
-    k2 = @. t_dx1*t_dx1+t_dx2*t_dx2+t_dx3*t_dx3
-    (x0, k2, t1_exact.*t0)
+    κ² = @. τ_dx1*τ_dx1+τ_dx2*τ_dx2+τ_dx3*τ_dx3
+    (x0, κ², τ₁_exact.*τ₀)
 end
 
