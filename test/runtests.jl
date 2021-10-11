@@ -6,6 +6,35 @@ module FEFMM_Tests
 
     include("testmediums.jl")
 
+    function convergence_test(hlist, test_fun, test_name)
+        @testset "$test_name" begin
+            linorm = zeros(length(hlist))
+            l2norm = zeros(length(hlist))
+            for i = 1:length(hlist)
+                (x0, k2, t_exact) = test_fun(hlist[i]) 
+                t_pred = FEFMM.fefmm(k2, repeat([hlist[i]], ndims(k2)), x0)
+                err = t_exact.-t_pred
+                linorm[i] = norm(err, Inf)
+                l2norm[i] = norm(err, 2)/sqrt(length(err))
+            end
+
+            plt = lineplot(log10.(hlist), 
+                        log10.(linorm),
+                        title = test_name,
+                        name = "L_inf norm",
+                        xlabel = "log_10(h)",
+                        ylabel = "log_10(Error)", 
+                        xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
+                        ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
+                        color = :blue)
+            
+            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
+            println(plt)
+            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
+            @test reverse(l2norm) == sort(l2norm)
+        end
+    end
+
     @testset "FEFMM Tests" begin
         @testset "Solve Piecewise Quadratic" begin
             @test isapprox(FEFMM.solve_piecewise_quadratic(1.0,1.0,1.0), 2.0)
@@ -47,174 +76,14 @@ module FEFMM_Tests
             @test all(isapprox.(Float32.(τa3d), Float32.(FEFMM.fefmm(κ23d, Float32.(dx3d), xs3d))))
         end
 
-        @testset "Constant Gradient of Squared Slowness 2D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]#, 1/640, 1/1280]
-            linorm = zeros(length(hlist))
-            l2norm = zeros(length(hlist))
-            for i = 1:length(hlist)
-                (x0, k2, t_exact) = const_k2_2D(hlist[i])
-                t_pred = FEFMM.fefmm(k2, [hlist[i], hlist[i]], x0)
-                err = t_exact.-t_pred
-                linorm[i] = norm(err, Inf)
-                l2norm[i] = norm(err, 2)/sqrt(length(err))
-            end
-
-            plt = lineplot(log10.(hlist), 
-                           log10.(linorm),
-                           title = "Constant Gradient of Squared Slowness 2D",
-                           name = "L_inf norm",
-                           xlabel = "log_10(h)",
-                           ylabel = "log_10(Error)", 
-                           xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
-                           ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
-                           color = :blue)
-            
-            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
-            println(plt)
-            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
-            @test reverse(l2norm) == sort(l2norm)
+        @testset "Convergence Tests" begin
+            convergence_test([1/20, 1/40, 1/80, 1/160, 1/320], const_k2_2D, "Constant Gradient of Squared Slowness 2D")
+            convergence_test([1/20, 1/40, 1/80, 1/160, 1/320], const_v2_2D, "Constant Gradient of Squared Velocity 2D")
+            convergence_test([1/20, 1/40, 1/80, 1/160, 1/320], gaussian_factor_2D, "Gaussian Factor 2D")
+            convergence_test([1/20, 1/40, 1/80], const_k2_3D, "Constant Gradient of Squared Slowness 3D")
+            convergence_test([1/20, 1/40, 1/80], const_v2_3D, "Constant Gradient of Squared Velocity 3D")
+            convergence_test([1/20, 1/40, 1/80], gaussian_factor_3D, "Gaussian Factor 3D")
         end
-
-        @testset "Constant Gradient of Squared Velocity 2D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]#, 1/640, 1/1280]
-            linorm = zeros(length(hlist))
-            l2norm = zeros(length(hlist))
-            for i = 1:length(hlist)
-                (x0, k2, t_exact) = const_v2_2D(hlist[i])
-                t_pred = FEFMM.fefmm(k2, [hlist[i], hlist[i]], x0)
-                err = t_exact.-t_pred
-                linorm[i] = norm(err, Inf)
-                l2norm[i] = norm(err, 2)/sqrt(length(err))
-            end
-
-                plt = lineplot(log10.(hlist), 
-                            log10.(linorm),
-                            title = "Constant Gradient of Squared Velocity 2D",
-                            name = "L_inf norm",
-                            xlabel = "log_10(h)",
-                            ylabel = "log_10(Error)", 
-                            xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
-                            ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
-                            color = :blue)
-
-            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
-            println(plt)
-            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
-            @test reverse(l2norm) == sort(l2norm)
-        end
-
-        @testset "Gaussian Factor 2D" begin
-            hlist = [1/20, 1/40, 1/80, 1/160, 1/320]#, 1/640, 1/1280]
-            linorm = zeros(length(hlist))
-            l2norm = zeros(length(hlist))
-            for i = 1:length(hlist)
-                (x0, k2, t_exact) = gaussian_factor_2D(hlist[i])
-                t_pred = FEFMM.fefmm(k2, [hlist[i], hlist[i]], x0)
-                err = t_exact.-t_pred
-                linorm[i] = norm(err, Inf)
-                l2norm[i] = norm(err, 2)/sqrt(length(err))
-            end
-
-                plt = lineplot(log10.(hlist), 
-                            log10.(linorm),
-                            title = "Gaussian Factor 2D",
-                            name = "L_inf norm",
-                            xlabel = "log_10(h)",
-                            ylabel = "log_10(Error)", 
-                            xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
-                            ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
-                            color = :blue)
-
-            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
-            println(plt)
-            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
-            @test reverse(l2norm) == sort(l2norm)
-        end
-        
-        @testset "Constant Gradient of Squared Slowness 3D" begin
-            hlist = [1/10, 1/20, 1/40, 1/80]#, 1/160, 1/320]
-            linorm = zeros(length(hlist))
-            l2norm = zeros(length(hlist))
-            for i = 1:length(hlist)
-                (x0, k2, t_exact) = const_k2_3D(hlist[i])
-                t_pred = FEFMM.fefmm(k2, [hlist[i], hlist[i], hlist[i]], x0)
-                err = t_exact.-t_pred
-                linorm[i] = norm(err, Inf)
-                l2norm[i] = norm(err, 2)/sqrt(length(err))
-            end
-
-            plt = lineplot(log10.(hlist), 
-                           log10.(linorm),
-                           title = "Constant Gradient of Squared Slowness 3D",
-                           name = "L_inf norm",
-                           xlabel = "log_10(h)",
-                           ylabel = "log_10(Error)", 
-                           xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
-                           ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
-                           color = :blue)
-            
-            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
-            println(plt)
-            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
-            @test reverse(l2norm) == sort(l2norm)
-        end
-
-        @testset "Constant Gradient of Squared Velocity 3D" begin
-            hlist = [1/10, 1/20, 1/40, 1/80]#, 1/160, 1/320]
-            linorm = zeros(length(hlist))
-            l2norm = zeros(length(hlist))
-            for i = 1:length(hlist)
-                (x0, k2, t_exact) = const_v2_3D(hlist[i])
-                t_pred = FEFMM.fefmm(k2, [hlist[i], hlist[i], hlist[i]], x0)
-                err = t_exact.-t_pred
-                linorm[i] = norm(err, Inf)
-                l2norm[i] = norm(err, 2)/sqrt(length(err))
-            end
-
-            plt = lineplot(log10.(hlist), 
-                           log10.(linorm),
-                           title = "Constant Gradient of Squared Velocity 3D",
-                           name = "L_inf norm",
-                           xlabel = "log_10(h)",
-                           ylabel = "log_10(Error)", 
-                           xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
-                           ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
-                           color = :blue)
-            
-            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
-            println(plt)
-            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
-            @test reverse(l2norm) == sort(l2norm)
-        end
-
-        @testset "Gaussian Factor 3D" begin
-            hlist = [1/10, 1/20, 1/40, 1/80]#, 1/160, 1/320]
-            linorm = zeros(length(hlist))
-            l2norm = zeros(length(hlist))
-            for i = 1:length(hlist)
-                (x0, k2, t_exact) = gaussian_factor_3D(hlist[i])
-                t_pred = FEFMM.fefmm(k2, [hlist[i], hlist[i], hlist[i]], x0)
-                err = t_exact.-t_pred
-                linorm[i] = norm(err, Inf)
-                l2norm[i] = norm(err, 2)/sqrt(length(err))
-            end
-
-            plt = lineplot(log10.(hlist), 
-                           log10.(linorm),
-                           title = "Gaussian Factor 3D",
-                           name = "L_inf norm",
-                           xlabel = "log_10(h)",
-                           ylabel = "log_10(Error)", 
-                           xlim = [floor(minimum(log10.(hlist))), ceil(maximum(log10.(hlist)))],
-                           ylim = [floor(minimum(log10.([linorm; l2norm]))), ceil(maximum(log10.([linorm; l2norm])))],
-                           color = :blue)
-            
-            lineplot!(plt, log10.(hlist), log10.(l2norm), name = "mean L2 norm", color = :red)
-            println(plt)
-            @test reverse(linorm) == sort(linorm) #test for decreasing error with decreasing h
-            @test reverse(l2norm) == sort(l2norm)
-        end
-
     end
 end
 
