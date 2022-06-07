@@ -135,3 +135,29 @@ function fefmm(κ2::Array{R, N},
     τ1.*τ0
 end
 
+
+function fefmm2(κ2::Array{R, N},
+    dx::Vector{<:AbstractFloat},
+    xs::CartesianIndex{N}) where {R <: AbstractFloat, N}
+#initialization
+cs = cartstrides(κ2)
+inds = CartesianIndices(κ2)
+I1 = first(inds)
+Iend = last(inds)
+τ0 = ones(R, size(κ2))
+mul_analytic!(τ0, dx..., size(κ2)..., Tuple(xs)...)
+∇τ0 = grad_analytic(τ0, dx..., size(κ2)..., Tuple(xs)...)
+τ1 = R(Inf).*ones(R, size(κ2))
+τ1[xs] = sqrt(κ2[xs])
+tags = ones(UInt8,size(κ2))
+tags[xs] = 0x2
+front = BinaryMinHeap{Node{R,N}}()
+push!(front, Node(inds[xs], τ1[xs]*τ0[xs])) 
+α = Array{R}(undef,length(size(τ1)))
+β = similar(α)
+LI = LinearIndices(τ1)
+xn = Array{typeof(I1)}(undef, N*2)
+#main loop
+fefmm_loop!(τ1, 1, α, β, τ0, ∇τ0, tags, front, κ2, dx, cs, xn, I1, Iend, LI)
+τ1.*τ0, ∇τ0
+end
