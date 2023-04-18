@@ -17,7 +17,7 @@ This module exports a single function, e.g.
     k2 = ones(100,100) #slowness squared
     dx = [1.0, 1.0] # grid spacing
     x0 = CartesianIndex(1,1) # source location index
-    (t, ordering) = fefmm(k2,dx,x0) #the function gives both the time estimate (t) and order in which nodes were finalized (ordering)
+    t = fefmm(k2,dx,x0) #the function gives the time estimate (t) 
 ```
 # Requirements
  - Julia 1.0+
