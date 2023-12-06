@@ -111,7 +111,7 @@ Tags:
 
 function fefmm(κ2::Array{R, N},
                dx::Vector{<:AbstractFloat},
-               xs::CartesianIndex{N}) where {R <: AbstractFloat, N}
+               xs::CartesianIndex{N}; return_factor=false) where {R <: AbstractFloat, N}
     #initialization
     cs = cartstrides(κ2)
     inds = CartesianIndices(κ2)
@@ -132,6 +132,10 @@ function fefmm(κ2::Array{R, N},
     xn = Array{typeof(I1)}(undef, N*2)
     #main loop
     fefmm_loop!(τ1, 1, α, β, τ0, ∇τ0, tags, front, κ2, dx, cs, xn, I1, Iend, LI)
-    τ1.*τ0
+    if return_factor
+        return τ1 # for some ML workflows you might only want the factor rather than the full solution
+    else
+        return τ1.*τ0
+    end
 end
 
