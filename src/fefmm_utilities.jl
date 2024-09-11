@@ -31,6 +31,12 @@ function mul_analytic!(τ::Array{<:AbstractFloat,3},
     end
 end
 
+function mul_analytic!(τ::Array{T,N}, dx::NTuple{N,AbstractFloat}, ie::NTuple{N,Integer}, xs::NTuple{N,Integer}) where {T<:AbstractFloat,N}
+    for idx in CartesianIndices(τ)
+        @inbounds τ[idx] *= sqrt(sum(((Tuple(idx) .- xs) .* dx).^2))
+    end
+end
+
 function grad_analytic(τ0::Vector{R},
                        dx1::AbstractFloat,
                        ie1::Integer,
@@ -77,6 +83,22 @@ function grad_analytic(τ0::Array{R,3},
     ∇τ0[1][xs1, xs2, xs3] = 1/sqrt(3)
     ∇τ0[2][xs1, xs2, xs3] = 1/sqrt(3)
     ∇τ0[3][xs1, xs2, xs3] = 1/sqrt(3)
+    ∇τ0
+end
+
+function grad_analytic(τ0::Array{T,N}, dx::NTuple{N,AbstractFloat}, ie::NTuple{N,Integer}, xs::NTuple{N,Integer}) where {T<:AbstractFloat,N}
+    ∇τ0 = [ones(T, size(τ0)) for _ in 1:N]
+    for (d, grad) in enumerate(∇τ0)
+        for idx in CartesianIndices(τ0)
+            @inbounds grad[idx] = dx[d] * (Tuple(idx)[d] - xs[d]) / τ0[idx]
+        end
+    end
+    
+    source_idx = CartesianIndex(xs)
+    for grad in ∇τ0
+        @inbounds grad[source_idx] = 1 / sqrt(N)
+    end
+    
     ∇τ0
 end
 

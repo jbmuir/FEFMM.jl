@@ -33,34 +33,24 @@ end
 
 
 @noinline function check1bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, I1::S) where {N, R <: AbstractFloat, S <: CartesianIndex{N}}
-    if cilt(I1, x-s) && @inbounds tags[x-s] == 0x3
-        return true
-    else
-        return false
-    end
+    xms = x - s
+    return cilt(I1, xms) && @inbounds tags[xms] == 0x3
 end
 
 @noinline function check1fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: AbstractFloat, S <: CartesianIndex{N}}
-    if cilt(x+s, Iend) && @inbounds tags[x+s] == 0x3
-        return true
-    else
-        return false
-    end
+    xps = x + s
+    return cilt(xps, Iend) && @inbounds tags[xps] == 0x3
 end
 
 @noinline function check2bwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, I1::S) where {N, R <: AbstractFloat, S <:CartesianIndex{N}}
-    if cilt(I1, x-2*s) && @inbounds tags[x-2*s] == 0x3 && @inbounds τ1[x-s]*τ0[x-s] >= τ1[x-2*s]*τ0[x-2*s]
-        return true
-    else
-        return false
-    end 
+    xms = x - s
+    xm2s = x - 2*s
+    return cilt(I1, xm2s) && @inbounds tags[xm2s] == 0x3 && @inbounds τ1[xms]*τ0[xms] >= τ1[xm2s]*τ0[xm2s]
 end
 
 @noinline function check2fwd(τ1::Array{R, N}, τ0::Array{R, N}, tags::Array{UInt8, N}, x::S, s::S, Iend::S) where {N, R <: AbstractFloat, S <:CartesianIndex{N}}
-    if cilt(x+2*s, Iend) && @inbounds tags[x+2*s] == 0x3 && @inbounds τ1[x+s]*τ0[x+s] > τ1[x+2*s]*τ0[x+2*s]
-        return true
-    else
-        return false
-    end 
+    xps = x + s
+    xp2s = x + 2*s
+    return cilt(xp2s, Iend) && @inbounds tags[xp2s] == 0x3 && @inbounds τ1[xps]*τ0[xps] > τ1[xp2s]*τ0[xp2s]
 end
 

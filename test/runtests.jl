@@ -77,12 +77,71 @@ module FEFMM_Tests
         end
 
         @testset "Convergence Tests" begin
-            convergence_test([1/20, 1/40, 1/80, 1/160, 1/320], const_k2_2D, "Constant Gradient of Squared Slowness 2D")
-            convergence_test([1/20, 1/40, 1/80, 1/160, 1/320], const_v2_2D, "Constant Gradient of Squared Velocity 2D")
-            convergence_test([1/20, 1/40, 1/80, 1/160, 1/320], gaussian_factor_2D, "Gaussian Factor 2D")
-            convergence_test([1/20, 1/40, 1/80], const_k2_3D, "Constant Gradient of Squared Slowness 3D")
-            convergence_test([1/20, 1/40, 1/80], const_v2_3D, "Constant Gradient of Squared Velocity 3D")
-            convergence_test([1/20, 1/40, 1/80], gaussian_factor_3D, "Gaussian Factor 3D")
+            convergence_test([1/10, 1/20, 1/40, 1/80, 1/160, 1/320], const_k2_2D, "Constant Gradient of Squared Slowness 2D")
+            convergence_test([1/10, 1/20, 1/40, 1/80, 1/160, 1/320], const_v2_2D, "Constant Gradient of Squared Velocity 2D")
+            convergence_test([1/10, 1/20, 1/40, 1/80, 1/160, 1/320], gaussian_factor_2D, "Gaussian Factor 2D")
+            convergence_test([1/10, 1/20, 1/40, 1/80], const_k2_3D, "Constant Gradient of Squared Slowness 3D")
+            convergence_test([1/10, 1/20, 1/40, 1/80], const_v2_3D, "Constant Gradient of Squared Velocity 3D")
+            convergence_test([1/10, 1/20, 1/40, 1/80], gaussian_factor_3D, "Gaussian Factor 3D")
+        end
+
+        @testset "N-dimensional mul_analytic! and grad_analytic" begin
+            @testset "1D case" begin
+                τ_1d = ones(5)
+                dx1, ie1, xs1 = 0.1, 5, 1
+                FEFMM.mul_analytic!(τ_1d, (dx1,), (ie1,), (xs1,))
+                @test isapprox(τ_1d, [1.0, 1.1, 1.2, 1.3, 1.4])
+
+                τ0_1d = [1.0, 1.1, 1.2, 1.3, 1.4]
+                grad_1d = FEFMM.grad_analytic(τ0_1d, (dx1,), (ie1,), (xs1,))
+                @test length(grad_1d) == 1
+                @test size(grad_1d[1]) == (5,)
+                @test isapprox(grad_1d[1], [1.0, 0.09090909, 0.16666667, 0.23076923, 0.28571429], rtol=1e-6)
+            end
+
+            @testset "2D case" begin
+                τ_2d = ones(3, 3)
+                dx1, dx2, ie1, ie2, xs1, xs2 = 0.1, 0.1, 3, 3, 1, 1
+                FEFMM.mul_analytic!(τ_2d, (dx1, dx2), (ie1, ie2), (xs1, xs2))
+                @test isapprox(τ_2d, [1.0 1.1 1.2; 1.1 1.414214 1.5; 1.2 1.5 1.732051], rtol=1e-6)
+
+                τ0_2d = [1.0 1.1 1.2; 1.1 1.414214 1.5; 1.2 1.5 1.732051]
+                grad_2d = FEFMM.grad_analytic(τ0_2d, (dx1, dx2), (ie1, ie2), (xs1, xs2))
+                @test length(grad_2d) == 2
+                @test all(size.(grad_2d) .== Ref((3, 3)))
+                @test isapprox(grad_2d[1][1,1], 1/sqrt(2), rtol=1e-6)
+                @test isapprox(grad_2d[2][1,1], 1/sqrt(2), rtol=1e-6)
+            end
+
+            @testset "3D case" begin
+                τ_3d = ones(2, 2, 2)
+                dx1, dx2, dx3, ie1, ie2, ie3, xs1, xs2, xs3 = 0.1, 0.1, 0.1, 2, 2, 2, 1, 1, 1
+                FEFMM.mul_analytic!(τ_3d, (dx1, dx2, dx3), (ie1, ie2, ie3), (xs1, xs2, xs3))
+                @test isapprox(τ_3d, cat([1.0 1.1; 1.1 1.414214], [1.1 1.414214; 1.414214 1.732051], dims=3), rtol=1e-6)
+
+                τ0_3d = cat([1.0 1.1; 1.1 1.414214], [1.1 1.414214; 1.414214 1.732051], dims=3)
+                grad_3d = FEFMM.grad_analytic(τ0_3d, (dx1, dx2, dx3), (ie1, ie2, ie3), (xs1, xs2, xs3))
+                @test length(grad_3d) == 3
+                @test all(size.(grad_3d) .== Ref((2, 2, 2)))
+                @test isapprox(grad_3d[1][1,1,1], 1/sqrt(3), rtol=1e-6)
+                @test isapprox(grad_3d[2][1,1,1], 1/sqrt(3), rtol=1e-6)
+                @test isapprox(grad_3d[3][1,1,1], 1/sqrt(3), rtol=1e-6)
+            end
+
+            @testset "4D case" begin
+                τ_4d = ones(2, 2, 2, 2)
+                dx = (0.1, 0.1, 0.1, 0.1)
+                ie = (2, 2, 2, 2)
+                xs = (1, 1, 1, 1)
+                FEFMM.mul_analytic!(τ_4d, dx, ie, xs)
+                @test isapprox(τ_4d[2,2,2,2], sqrt(4 * 0.1^2), rtol=1e-6)
+
+                τ0_4d = copy(τ_4d)
+                grad_4d = FEFMM.grad_analytic(τ0_4d, dx, ie, xs)
+                @test length(grad_4d) == 4
+                @test all(size.(grad_4d) .== Ref((2, 2, 2, 2)))
+                @test all(isapprox.(getindex.(grad_4d, 1, 1, 1, 1), 1/sqrt(4), rtol=1e-6))
+            end
         end
     end
 end
